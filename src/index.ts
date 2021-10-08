@@ -94,35 +94,35 @@ class FileLoggerStatic {
 		return RNFileLogger.sendLogFilesByEmail(options);
 	}
 
-	debug(msg: string, context: any) {
+	debug(msg: string, context: any = {}) {
 		const logContext = { ...this.context, ...context };
 		const message = msg.replace('\n', '');
 
 		this.write(LogLevel.Debug, message, logContext);
 	}
 
-	info(msg: string, context: any) {
+	info(msg: string, context: any = {}) {
 		const logContext = { ...this.context, ...context };
 		const message = msg.replace('\n', '');
 
 		this.write(LogLevel.Info, message, logContext);
 	}
 
-	warn(msg: string, context: any) {
+	warn(msg: string, context: any = {}) {
 		const logContext = { ...this.context, ...context };
 		const message = msg.replace('\n', '');
 
 		this.write(LogLevel.Warning, message, logContext);
 	}
 
-	error(msg: string, context: any) {
+	error(msg: string, context: any = {}) {
 		const logContext = { ...this.context, ...context };
 		const message = msg.replace('\n', '');
 
 		this.write(LogLevel.Error, message, logContext);
 	}
 
-	write(level: LogLevel, msg: string, context?: any) {
+	write(level: LogLevel, msg: string, context: any = {}) {
 		if (this._logLevel <= level) {
 			RNFileLogger.write(level, this._formatter(level, msg, context));
 		}

@@ -134,26 +134,31 @@ var FileLoggerStatic = /** @class */ (function () {
         return RNFileLogger.sendLogFilesByEmail(options);
     };
     FileLoggerStatic.prototype.debug = function (msg, context) {
+        if (context === void 0) { context = {}; }
         var logContext = __assign(__assign({}, this.context), context);
         var message = msg.replace('\n', '');
         this.write(LogLevel.Debug, message, logContext);
     };
     FileLoggerStatic.prototype.info = function (msg, context) {
+        if (context === void 0) { context = {}; }
         var logContext = __assign(__assign({}, this.context), context);
         var message = msg.replace('\n', '');
         this.write(LogLevel.Info, message, logContext);
     };
     FileLoggerStatic.prototype.warn = function (msg, context) {
+        if (context === void 0) { context = {}; }
         var logContext = __assign(__assign({}, this.context), context);
         var message = msg.replace('\n', '');
         this.write(LogLevel.Warning, message, logContext);
     };
     FileLoggerStatic.prototype.error = function (msg, context) {
+        if (context === void 0) { context = {}; }
         var logContext = __assign(__assign({}, this.context), context);
         var message = msg.replace('\n', '');
         this.write(LogLevel.Error, message, logContext);
     };
     FileLoggerStatic.prototype.write = function (level, msg, context) {
+        if (context === void 0) { context = {}; }
         if (this._logLevel <= level) {
             RNFileLogger.write(level, this._formatter(level, msg, context));
         }
