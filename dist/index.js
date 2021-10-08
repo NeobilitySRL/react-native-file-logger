@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,7 +47,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FileLogger = exports.defaultFormatter = exports.logLevelNames = exports.LogLevel = void 0;
+exports.FileLogger = exports.jsonFormatter = exports.defaultFormatter = exports.logLevelNames = exports.LogLevel = void 0;
 var react_native_1 = require("react-native");
 var RNFileLogger = react_native_1.NativeModules.FileLogger;
 var LogLevel;
@@ -51,23 +62,27 @@ var FileLoggerStatic = /** @class */ (function () {
         var _this = this;
         this._logLevel = LogLevel.Debug;
         this._formatter = exports.defaultFormatter;
+        this.context = {};
         this._handleLog = function (level, msg) {
             switch (level) {
                 case "debug":
-                    _this.debug(msg);
+                    _this.debug(msg, {});
                     break;
                 case "log":
-                    _this.info(msg);
+                    _this.info(msg, {});
                     break;
                 case "warning":
-                    _this.warn(msg);
+                    _this.warn(msg, {});
                     break;
                 case "error":
-                    _this.error(msg);
+                    _this.error(msg, {});
                     break;
             }
         };
     }
+    FileLoggerStatic.prototype.apply = function (newContext) {
+        this.context = __assign(__assign({}, this.context), newContext);
+    };
     FileLoggerStatic.prototype.configure = function (options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
@@ -118,30 +133,43 @@ var FileLoggerStatic = /** @class */ (function () {
         if (options === void 0) { options = {}; }
         return RNFileLogger.sendLogFilesByEmail(options);
     };
-    FileLoggerStatic.prototype.debug = function (msg) {
-        this.write(LogLevel.Debug, msg);
+    FileLoggerStatic.prototype.debug = function (msg, context) {
+        var logContext = __assign(__assign({}, this.context), context);
+        var message = msg.replace('\n', '');
+        this.write(LogLevel.Debug, message, logContext);
     };
-    FileLoggerStatic.prototype.info = function (msg) {
-        this.write(LogLevel.Info, msg);
+    FileLoggerStatic.prototype.info = function (msg, context) {
+        var logContext = __assign(__assign({}, this.context), context);
+        var message = msg.replace('\n', '');
+        this.write(LogLevel.Info, message, logContext);
     };
-    FileLoggerStatic.prototype.warn = function (msg) {
-        this.write(LogLevel.Warning, msg);
+    FileLoggerStatic.prototype.warn = function (msg, context) {
+        var logContext = __assign(__assign({}, this.context), context);
+        var message = msg.replace('\n', '');
+        this.write(LogLevel.Warning, message, logContext);
     };
-    FileLoggerStatic.prototype.error = function (msg) {
-        this.write(LogLevel.Error, msg);
+    FileLoggerStatic.prototype.error = function (msg, context) {
+        var logContext = __assign(__assign({}, this.context), context);
+        var message = msg.replace('\n', '');
+        this.write(LogLevel.Error, message, logContext);
     };
-    FileLoggerStatic.prototype.write = function (level, msg) {
+    FileLoggerStatic.prototype.write = function (level, msg, context) {
         if (this._logLevel <= level) {
-            RNFileLogger.write(level, this._formatter(level, msg));
+            RNFileLogger.write(level, this._formatter(level, msg, context));
         }
     };
     return FileLoggerStatic;
 }());
 exports.logLevelNames = ["DEBUG", "INFO", "WARN", "ERROR"];
-exports.defaultFormatter = function (level, msg) {
+exports.defaultFormatter = function (level, msg, context) {
     var now = new Date();
     var levelName = exports.logLevelNames[level];
-    return now.toISOString() + " [" + levelName + "]  " + msg;
+    return now.toISOString() + " [" + levelName + "]  " + msg + " " + context;
+};
+exports.jsonFormatter = function (level, msg, context) {
+    var now = new Date();
+    var levelName = exports.logLevelNames[level];
+    return JSON.stringify(__assign({ timestamp: now.getTime(), logLevel: levelName, message: msg }, context));
 };
 exports.FileLogger = new FileLoggerStatic();
 //# sourceMappingURL=index.js.map
