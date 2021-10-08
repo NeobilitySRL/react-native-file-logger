@@ -32,10 +32,10 @@ declare class FileLoggerStatic {
     getLogFilePaths(): Promise<string[]>;
     deleteLogFiles(): Promise<void>;
     sendLogFilesByEmail(options?: SendByEmailOptions): Promise<void>;
-    debug(msg: string, context: any): void;
-    info(msg: string, context: any): void;
-    warn(msg: string, context: any): void;
-    error(msg: string, context: any): void;
+    debug(msg: string, context?: any): void;
+    info(msg: string, context?: any): void;
+    warn(msg: string, context?: any): void;
+    error(msg: string, context?: any): void;
     write(level: LogLevel, msg: string, context?: any): void;
     private _handleLog;
 }
