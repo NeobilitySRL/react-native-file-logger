@@ -11,7 +11,7 @@ export enum LogLevel {
 	Error,
 }
 
-export type LogFormatter = (level: LogLevel, msg: string) => string;
+export type LogFormatter = (level: LogLevel, msg: string, context: any) => string;
 
 export interface ConfigureOptions {
 	logLevel?: LogLevel;
@@ -32,6 +32,11 @@ export interface SendByEmailOptions {
 class FileLoggerStatic {
 	private _logLevel = LogLevel.Debug;
 	private _formatter = defaultFormatter;
+	private context = {}
+
+	apply(newContext: any) {
+		this.context = { ...this.context, ...newContext };
+	}
 
 	async configure(options: ConfigureOptions = {}): Promise<void> {
 		const {
@@ -89,41 +94,53 @@ class FileLoggerStatic {
 		return RNFileLogger.sendLogFilesByEmail(options);
 	}
 
-	debug(msg: string) {
-		this.write(LogLevel.Debug, msg);
+	debug(msg: string, context: any) {
+		const logContext = { ...this.context, ...context };
+		const message = msg.replace('\n', '');
+
+		this.write(LogLevel.Debug, message, logContext);
 	}
 
-	info(msg: string) {
-		this.write(LogLevel.Info, msg);
+	info(msg: string, context: any) {
+		const logContext = { ...this.context, ...context };
+		const message = msg.replace('\n', '');
+
+		this.write(LogLevel.Info, message, logContext);
 	}
 
-	warn(msg: string) {
-		this.write(LogLevel.Warning, msg);
+	warn(msg: string, context: any) {
+		const logContext = { ...this.context, ...context };
+		const message = msg.replace('\n', '');
+
+		this.write(LogLevel.Warning, message, logContext);
 	}
 
-	error(msg: string) {
-		this.write(LogLevel.Error, msg);
+	error(msg: string, context: any) {
+		const logContext = { ...this.context, ...context };
+		const message = msg.replace('\n', '');
+
+		this.write(LogLevel.Error, message, logContext);
 	}
 
-	write(level: LogLevel, msg: string) {
+	write(level: LogLevel, msg: string, context?: any) {
 		if (this._logLevel <= level) {
-			RNFileLogger.write(level, this._formatter(level, msg));
+			RNFileLogger.write(level, this._formatter(level, msg, context));
 		}
 	}
 
 	private _handleLog = (level: string, msg: string) => {
 		switch (level) {
 			case "debug":
-				this.debug(msg);
+				this.debug(msg, {});
 				break;
 			case "log":
-				this.info(msg);
+				this.info(msg, {});
 				break;
 			case "warning":
-				this.warn(msg);
+				this.warn(msg, {});
 				break;
 			case "error":
-				this.error(msg);
+				this.error(msg, {});
 				break;
 		}
 	};
@@ -131,10 +148,21 @@ class FileLoggerStatic {
 
 export const logLevelNames = ["DEBUG", "INFO", "WARN", "ERROR"];
 
-export const defaultFormatter: LogFormatter = (level, msg) => {
+export const defaultFormatter: LogFormatter = (level, msg, context) => {
 	const now = new Date();
 	const levelName = logLevelNames[level];
-	return `${now.toISOString()} [${levelName}]  ${msg}`;
+	return `${now.toISOString()} [${levelName}]  ${msg} ${context}`;
 };
+
+export const jsonFormatter: LogFormatter = (level, msg, context) => {
+	const now = new Date();
+	const levelName = logLevelNames[level];
+	return JSON.stringify({
+		timestamp: now.getTime(),
+		logLevel: levelName,
+		message: msg,
+		...context
+	});
+}
 
 export const FileLogger = new FileLoggerStatic();
