@@ -168,7 +168,7 @@ var FileLoggerStatic = /** @class */ (function () {
         if (this._logLevel <= level) {
             var message = this._formatter(level, msg, context);
             if (this._sendFileLogsAlsoToConsole) {
-                console.log("[" + level + "] " + msg);
+                console.log(new Date().toISOString() + " | [" + level + "]: " + msg);
             }
             RNFileLogger.write(level, message);
         }
