@@ -174,7 +174,7 @@ exports.defaultFormatter = function (level, msg, context) {
 exports.jsonFormatter = function (level, msg, context) {
     var now = new Date();
     var levelName = exports.logLevelNames[level];
-    return JSON.stringify(__assign({ timestamp: now.getTime(), logLevel: levelName, message: msg }, context));
+    return JSON.stringify(__assign({ timestamp: now.toISOString(), logLevel: levelName, message: msg }, context));
 };
 exports.FileLogger = new FileLoggerStatic();
 //# sourceMappingURL=index.js.map
