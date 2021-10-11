@@ -158,7 +158,7 @@ export const jsonFormatter: LogFormatter = (level, msg, context) => {
 	const now = new Date();
 	const levelName = logLevelNames[level];
 	return JSON.stringify({
-		timestamp: now.getTime(),
+		timestamp: now.toISOString(),
 		logLevel: levelName,
 		message: msg,
 		...context
