@@ -16,6 +16,7 @@ export type LogFormatter = (level: LogLevel, msg: string, context: any) => strin
 export interface ConfigureOptions {
 	logLevel?: LogLevel;
 	formatter?: LogFormatter;
+	sendFileLogsAlsoToConsole?: boolean;
 	captureConsole?: boolean;
 	dailyRolling?: boolean;
 	maximumFileSize?: number;
@@ -32,6 +33,7 @@ export interface SendByEmailOptions {
 class FileLoggerStatic {
 	private _logLevel = LogLevel.Debug;
 	private _formatter = defaultFormatter;
+	private _sendFileLogsAlsoToConsole = false;
 	private context = {}
 
 	apply(newContext: any) {
@@ -47,6 +49,7 @@ class FileLoggerStatic {
 			maximumFileSize = 1024 * 1024,
 			maximumNumberOfFiles = 5,
 			logsDirectory,
+			sendFileLogsAlsoToConsole,
 		} = options;
 
 		await RNFileLogger.configure({
@@ -58,6 +61,12 @@ class FileLoggerStatic {
 
 		this._logLevel = logLevel;
 		this._formatter = formatter;
+		this._sendFileLogsAlsoToConsole = sendFileLogsAlsoToConsole ?? false;
+
+		// If the logs are captured, a console log would cause a stackoverflow.
+		if (captureConsole) {
+			this._sendFileLogsAlsoToConsole = false;
+		}
 
 		if (captureConsole) {
 			this.enableConsoleCapture();
@@ -124,7 +133,11 @@ class FileLoggerStatic {
 
 	write(level: LogLevel, msg: string, context: any = {}) {
 		if (this._logLevel <= level) {
-			RNFileLogger.write(level, this._formatter(level, msg, context));
+			const message = this._formatter(level, msg, context);
+			if (this._sendFileLogsAlsoToConsole) {
+				console.log(`[${level}] ${message}`);
+			}
+			RNFileLogger.write(level, message);
 		}
 	}
 
