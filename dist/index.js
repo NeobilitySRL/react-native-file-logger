@@ -62,6 +62,7 @@ var FileLoggerStatic = /** @class */ (function () {
         var _this = this;
         this._logLevel = LogLevel.Debug;
         this._formatter = exports.defaultFormatter;
+        this._sendFileLogsAlsoToConsole = false;
         this.context = {};
         this._handleLog = function (level, msg) {
             switch (level) {
@@ -86,11 +87,11 @@ var FileLoggerStatic = /** @class */ (function () {
     FileLoggerStatic.prototype.configure = function (options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var _a, logLevel, _b, formatter, _c, captureConsole, _d, dailyRolling, _e, maximumFileSize, _f, maximumNumberOfFiles, logsDirectory;
+            var _a, logLevel, _b, formatter, _c, captureConsole, _d, dailyRolling, _e, maximumFileSize, _f, maximumNumberOfFiles, logsDirectory, sendFileLogsAlsoToConsole;
             return __generator(this, function (_g) {
                 switch (_g.label) {
                     case 0:
-                        _a = options.logLevel, logLevel = _a === void 0 ? LogLevel.Debug : _a, _b = options.formatter, formatter = _b === void 0 ? exports.defaultFormatter : _b, _c = options.captureConsole, captureConsole = _c === void 0 ? true : _c, _d = options.dailyRolling, dailyRolling = _d === void 0 ? true : _d, _e = options.maximumFileSize, maximumFileSize = _e === void 0 ? 1024 * 1024 : _e, _f = options.maximumNumberOfFiles, maximumNumberOfFiles = _f === void 0 ? 5 : _f, logsDirectory = options.logsDirectory;
+                        _a = options.logLevel, logLevel = _a === void 0 ? LogLevel.Debug : _a, _b = options.formatter, formatter = _b === void 0 ? exports.defaultFormatter : _b, _c = options.captureConsole, captureConsole = _c === void 0 ? true : _c, _d = options.dailyRolling, dailyRolling = _d === void 0 ? true : _d, _e = options.maximumFileSize, maximumFileSize = _e === void 0 ? 1024 * 1024 : _e, _f = options.maximumNumberOfFiles, maximumNumberOfFiles = _f === void 0 ? 5 : _f, logsDirectory = options.logsDirectory, sendFileLogsAlsoToConsole = options.sendFileLogsAlsoToConsole;
                         return [4 /*yield*/, RNFileLogger.configure({
                                 dailyRolling: dailyRolling,
                                 maximumFileSize: maximumFileSize,
@@ -101,6 +102,11 @@ var FileLoggerStatic = /** @class */ (function () {
                         _g.sent();
                         this._logLevel = logLevel;
                         this._formatter = formatter;
+                        this._sendFileLogsAlsoToConsole = sendFileLogsAlsoToConsole !== null && sendFileLogsAlsoToConsole !== void 0 ? sendFileLogsAlsoToConsole : false;
+                        // If the logs are captured, a console log would cause a stackoverflow.
+                        if (captureConsole) {
+                            this._sendFileLogsAlsoToConsole = false;
+                        }
                         if (captureConsole) {
                             this.enableConsoleCapture();
                         }
@@ -160,7 +166,11 @@ var FileLoggerStatic = /** @class */ (function () {
     FileLoggerStatic.prototype.write = function (level, msg, context) {
         if (context === void 0) { context = {}; }
         if (this._logLevel <= level) {
-            RNFileLogger.write(level, this._formatter(level, msg, context));
+            var message = this._formatter(level, msg, context);
+            if (this._sendFileLogsAlsoToConsole) {
+                console.log("[" + level + "] " + message);
+            }
+            RNFileLogger.write(level, message);
         }
     };
     return FileLoggerStatic;

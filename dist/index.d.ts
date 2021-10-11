@@ -8,6 +8,7 @@ export declare type LogFormatter = (level: LogLevel, msg: string, context: any) 
 export interface ConfigureOptions {
     logLevel?: LogLevel;
     formatter?: LogFormatter;
+    sendFileLogsAlsoToConsole?: boolean;
     captureConsole?: boolean;
     dailyRolling?: boolean;
     maximumFileSize?: number;
@@ -22,6 +23,7 @@ export interface SendByEmailOptions {
 declare class FileLoggerStatic {
     private _logLevel;
     private _formatter;
+    private _sendFileLogsAlsoToConsole;
     private context;
     apply(newContext: any): void;
     configure(options?: ConfigureOptions): Promise<void>;
