@@ -152,7 +152,12 @@ class FileLoggerStatic {
 		if (this._logLevel <= level) {
 			const message = this._formatter(level, msg, context, ...args);
 			if (this._sendFileLogsAlsoToConsole) {
-				console.log(`${new Date().toISOString()} | [${level}]: ${msg}`);
+				let outputMessage = msg;
+				args.forEach((arg: any) => {
+					outputMessage += ` ${arg.toString()}`
+				});
+
+				console.log(`${new Date().toISOString()} | [${level}]: ${outputMessage}`);
 			}
 			RNFileLogger.write(level, message);
 		}
