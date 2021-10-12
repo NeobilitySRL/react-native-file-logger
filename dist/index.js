@@ -46,6 +46,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileLogger = exports.jsonFormatter = exports.defaultFormatter = exports.logLevelNames = exports.LogLevel = void 0;
 var react_native_1 = require("react-native");
@@ -139,52 +146,109 @@ var FileLoggerStatic = /** @class */ (function () {
         if (options === void 0) { options = {}; }
         return RNFileLogger.sendLogFilesByEmail(options);
     };
-    FileLoggerStatic.prototype.debug = function (msg, context) {
-        if (context === void 0) { context = {}; }
-        var logContext = __assign(__assign({}, this.context), context);
-        var message = msg.replace('\n', '');
-        this.write(LogLevel.Debug, message, logContext);
+    FileLoggerStatic.prototype.debug = function (msg) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var _a = this.extractMessageAndContext(msg), error = _a.error, message = _a.message, logContext = _a.logContext;
+        if (error) {
+            return;
+        }
+        this.write(LogLevel.Debug, message, logContext, args);
     };
-    FileLoggerStatic.prototype.info = function (msg, context) {
-        if (context === void 0) { context = {}; }
-        var logContext = __assign(__assign({}, this.context), context);
-        var message = msg.replace('\n', '');
-        this.write(LogLevel.Info, message, logContext);
+    FileLoggerStatic.prototype.info = function (msg) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var _a = this.extractMessageAndContext(msg), error = _a.error, message = _a.message, logContext = _a.logContext;
+        if (error) {
+            return;
+        }
+        this.write(LogLevel.Info, message, logContext, args);
     };
-    FileLoggerStatic.prototype.warn = function (msg, context) {
-        if (context === void 0) { context = {}; }
-        var logContext = __assign(__assign({}, this.context), context);
-        var message = msg.replace('\n', '');
-        this.write(LogLevel.Warning, message, logContext);
+    FileLoggerStatic.prototype.warn = function (msg) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var _a = this.extractMessageAndContext(msg), error = _a.error, message = _a.message, logContext = _a.logContext;
+        if (error) {
+            return;
+        }
+        this.write(LogLevel.Warning, message, logContext, args);
     };
-    FileLoggerStatic.prototype.error = function (msg, context) {
-        if (context === void 0) { context = {}; }
-        var logContext = __assign(__assign({}, this.context), context);
-        var message = msg.replace('\n', '');
-        this.write(LogLevel.Error, message, logContext);
+    FileLoggerStatic.prototype.error = function (msg) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var _a = this.extractMessageAndContext(msg), error = _a.error, message = _a.message, logContext = _a.logContext;
+        if (error) {
+            return;
+        }
+        this.write(LogLevel.Error, message, logContext, args);
     };
     FileLoggerStatic.prototype.write = function (level, msg, context) {
         if (context === void 0) { context = {}; }
+        var args = [];
+        for (var _i = 3; _i < arguments.length; _i++) {
+            args[_i - 3] = arguments[_i];
+        }
         if (this._logLevel <= level) {
-            var message = this._formatter(level, msg, context);
+            var message = this._formatter.apply(this, __spreadArrays([level, msg, context], args));
             if (this._sendFileLogsAlsoToConsole) {
                 console.log(new Date().toISOString() + " | [" + level + "]: " + msg);
             }
             RNFileLogger.write(level, message);
         }
     };
+    FileLoggerStatic.prototype.extractMessageAndContext = function (msg) {
+        var message;
+        var logContext = __assign({}, this.context);
+        if (typeof msg === 'string') {
+            message = msg.replace('\n', '');
+        }
+        else if (msg.message) {
+            message = msg.message.replace('\n', '');
+            if (msg.context) {
+                logContext = __assign(__assign({}, this.context), msg.context);
+            }
+        }
+        else {
+            return { error: true };
+        }
+        return { error: false, message: message, logContext: logContext };
+    };
     return FileLoggerStatic;
 }());
 exports.logLevelNames = ["DEBUG", "INFO", "WARN", "ERROR"];
 exports.defaultFormatter = function (level, msg, context) {
+    var args = [];
+    for (var _i = 3; _i < arguments.length; _i++) {
+        args[_i - 3] = arguments[_i];
+    }
     var now = new Date();
     var levelName = exports.logLevelNames[level];
-    return now.toISOString() + " [" + levelName + "]  " + msg + " " + context;
+    var message = now.toISOString() + " [" + levelName + "]  " + msg + " " + context;
+    args.forEach(function (arg) {
+        message += " " + arg.toString();
+    });
+    return message;
 };
 exports.jsonFormatter = function (level, msg, context) {
+    var args = [];
+    for (var _i = 3; _i < arguments.length; _i++) {
+        args[_i - 3] = arguments[_i];
+    }
     var now = new Date();
     var levelName = exports.logLevelNames[level];
-    return JSON.stringify(__assign({ timestamp: now.toISOString(), logLevel: levelName, message: msg }, context));
+    var message = msg;
+    args.forEach(function (arg) {
+        message += " " + arg.toString();
+    });
+    return JSON.stringify(__assign({ timestamp: now.toISOString(), logLevel: levelName, message: message }, context));
 };
 exports.FileLogger = new FileLoggerStatic();
 //# sourceMappingURL=index.js.map

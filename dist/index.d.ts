@@ -4,7 +4,11 @@ export declare enum LogLevel {
     Warning = 2,
     Error = 3
 }
-export declare type LogFormatter = (level: LogLevel, msg: string, context: any) => string;
+export declare type LogLevelMessage = {
+    message: string;
+    context: any;
+};
+export declare type LogFormatter = (level: LogLevel, msg: string, context: any, ...args: any[]) => string;
 export interface ConfigureOptions {
     logLevel?: LogLevel;
     formatter?: LogFormatter;
@@ -34,11 +38,12 @@ declare class FileLoggerStatic {
     getLogFilePaths(): Promise<string[]>;
     deleteLogFiles(): Promise<void>;
     sendLogFilesByEmail(options?: SendByEmailOptions): Promise<void>;
-    debug(msg: string, context?: any): void;
-    info(msg: string, context?: any): void;
-    warn(msg: string, context?: any): void;
-    error(msg: string, context?: any): void;
-    write(level: LogLevel, msg: string, context?: any): void;
+    debug(msg: string | LogLevelMessage, ...args: any[]): void;
+    info(msg: string | LogLevelMessage, ...args: any[]): void;
+    warn(msg: string | LogLevelMessage, ...args: any[]): void;
+    error(msg: string | LogLevelMessage, ...args: any[]): void;
+    write(level: LogLevel, msg: string, context?: any, ...args: any[]): void;
+    private extractMessageAndContext;
     private _handleLog;
 }
 export declare const logLevelNames: string[];

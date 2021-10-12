@@ -11,7 +11,12 @@ export enum LogLevel {
 	Error,
 }
 
-export type LogFormatter = (level: LogLevel, msg: string, context: any) => string;
+export type LogLevelMessage = {
+	message: string;
+	context: any;
+};
+
+export type LogFormatter = (level: LogLevel, msg: string, context: any, ...args) => string;
 
 export interface ConfigureOptions {
 	logLevel?: LogLevel;
@@ -103,42 +108,72 @@ class FileLoggerStatic {
 		return RNFileLogger.sendLogFilesByEmail(options);
 	}
 
-	debug(msg: string, context: any = {}) {
-		const logContext = { ...this.context, ...context };
-		const message = msg.replace('\n', '');
+	debug(msg: string|LogLevelMessage, ...args) {
+		const { error, message, logContext } = this.extractMessageAndContext(msg);
 
-		this.write(LogLevel.Debug, message, logContext);
+		if (error) {
+			return;
+		}
+
+		this.write(LogLevel.Debug, message, logContext, args);
 	}
 
-	info(msg: string, context: any = {}) {
-		const logContext = { ...this.context, ...context };
-		const message = msg.replace('\n', '');
+	info(msg: string|LogLevelMessage, ...args) {
+		const { error, message, logContext } = this.extractMessageAndContext(msg);
 
-		this.write(LogLevel.Info, message, logContext);
+		if (error) {
+			return;
+		}
+
+		this.write(LogLevel.Info, message, logContext, args);
 	}
 
-	warn(msg: string, context: any = {}) {
-		const logContext = { ...this.context, ...context };
-		const message = msg.replace('\n', '');
+	warn(msg: string|LogLevelMessage, ...args) {
+		const { error, message, logContext } = this.extractMessageAndContext(msg);
 
-		this.write(LogLevel.Warning, message, logContext);
+		if (error) {
+			return;
+		}
+
+		this.write(LogLevel.Warning, message, logContext, args);
 	}
 
-	error(msg: string, context: any = {}) {
-		const logContext = { ...this.context, ...context };
-		const message = msg.replace('\n', '');
+	error(msg: string|LogLevelMessage, ...args) {
+		const { error, message, logContext } = this.extractMessageAndContext(msg);
 
-		this.write(LogLevel.Error, message, logContext);
+		if (error) {
+			return;
+		}
+
+		this.write(LogLevel.Error, message, logContext, args);
 	}
 
-	write(level: LogLevel, msg: string, context: any = {}) {
+	write(level: LogLevel, msg: string, context: any = {}, ...args) {
 		if (this._logLevel <= level) {
-			const message = this._formatter(level, msg, context);
+			const message = this._formatter(level, msg, context, ...args);
 			if (this._sendFileLogsAlsoToConsole) {
 				console.log(`${new Date().toISOString()} | [${level}]: ${msg}`);
 			}
 			RNFileLogger.write(level, message);
 		}
+	}
+
+	private extractMessageAndContext(msg: string|LogLevelMessage) {
+		let message;
+		let logContext = { ...this.context };
+		if (typeof msg === 'string') {
+			message = msg.replace('\n', '');
+		} else if (msg.message) {
+			message = msg.message.replace('\n', '');
+
+			if (msg.context) {
+				logContext = { ...this.context, ...msg.context };
+			}
+		} else {
+			return { error: true };
+		}
+
+		return { error: false, message, logContext };
 	}
 
 	private _handleLog = (level: string, msg: string) => {
@@ -161,19 +196,31 @@ class FileLoggerStatic {
 
 export const logLevelNames = ["DEBUG", "INFO", "WARN", "ERROR"];
 
-export const defaultFormatter: LogFormatter = (level, msg, context) => {
+export const defaultFormatter: LogFormatter = (level, msg, context, ...args) => {
 	const now = new Date();
 	const levelName = logLevelNames[level];
-	return `${now.toISOString()} [${levelName}]  ${msg} ${context}`;
+	let message = `${now.toISOString()} [${levelName}]  ${msg} ${context}`;
+
+	args.forEach((arg: any) => {
+		message += ` ${arg.toString()}`
+	});
+
+	return message;
 };
 
-export const jsonFormatter: LogFormatter = (level, msg, context) => {
+export const jsonFormatter: LogFormatter = (level, msg, context, ...args) => {
 	const now = new Date();
 	const levelName = logLevelNames[level];
+	let message = msg;
+
+	args.forEach((arg: any) => {
+		message += ` ${arg.toString()}`
+	});
+
 	return JSON.stringify({
 		timestamp: now.toISOString(),
 		logLevel: levelName,
-		message: msg,
+		message,
 		...context
 	});
 }
