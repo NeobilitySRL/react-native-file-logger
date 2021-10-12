@@ -8,7 +8,7 @@ export declare type LogLevelMessage = {
     message: string;
     context: any;
 };
-export declare type LogFormatter = (level: LogLevel, msg: string, context: any, ...args: any[]) => string;
+export declare type LogFormatter = (level: LogLevel, msg: string, context: any, args: any[]) => string;
 export interface ConfigureOptions {
     logLevel?: LogLevel;
     formatter?: LogFormatter;
@@ -42,7 +42,7 @@ declare class FileLoggerStatic {
     info(msg: string | LogLevelMessage, ...args: any[]): void;
     warn(msg: string | LogLevelMessage, ...args: any[]): void;
     error(msg: string | LogLevelMessage, ...args: any[]): void;
-    write(level: LogLevel, msg: string, context?: any, ...args: any[]): void;
+    write(level: LogLevel, msg: string, context: any, args: any): void;
     private extractMessageAndContext;
     private _handleLog;
 }

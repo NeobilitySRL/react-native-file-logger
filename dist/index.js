@@ -46,13 +46,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileLogger = exports.jsonFormatter = exports.defaultFormatter = exports.logLevelNames = exports.LogLevel = void 0;
 var react_native_1 = require("react-native");
@@ -191,14 +184,10 @@ var FileLoggerStatic = /** @class */ (function () {
         }
         this.write(LogLevel.Error, message, logContext, args);
     };
-    FileLoggerStatic.prototype.write = function (level, msg, context) {
+    FileLoggerStatic.prototype.write = function (level, msg, context, args) {
         if (context === void 0) { context = {}; }
-        var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-            args[_i - 3] = arguments[_i];
-        }
         if (this._logLevel <= level) {
-            var message = this._formatter.apply(this, __spreadArrays([level, msg, context], args));
+            var message = this._formatter(level, msg, context, args);
             if (this._sendFileLogsAlsoToConsole) {
                 var outputMessage_1 = msg;
                 args.forEach(function (arg) {
@@ -229,11 +218,7 @@ var FileLoggerStatic = /** @class */ (function () {
     return FileLoggerStatic;
 }());
 exports.logLevelNames = ["DEBUG", "INFO", "WARN", "ERROR"];
-exports.defaultFormatter = function (level, msg, context) {
-    var args = [];
-    for (var _i = 3; _i < arguments.length; _i++) {
-        args[_i - 3] = arguments[_i];
-    }
+exports.defaultFormatter = function (level, msg, context, args) {
     var now = new Date();
     var levelName = exports.logLevelNames[level];
     var message = now.toISOString() + " [" + levelName + "]  " + msg + " " + context;
@@ -242,11 +227,7 @@ exports.defaultFormatter = function (level, msg, context) {
     });
     return message;
 };
-exports.jsonFormatter = function (level, msg, context) {
-    var args = [];
-    for (var _i = 3; _i < arguments.length; _i++) {
-        args[_i - 3] = arguments[_i];
-    }
+exports.jsonFormatter = function (level, msg, context, args) {
     var now = new Date();
     var levelName = exports.logLevelNames[level];
     var message = msg;

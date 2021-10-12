@@ -17,7 +17,7 @@ export type LogLevelMessage = {
 	context: any;
 };
 
-export type LogFormatter = (level: LogLevel, msg: string, context: any, ...args) => string;
+export type LogFormatter = (level: LogLevel, msg: string, context: any, args: any[]) => string;
 
 export interface ConfigureOptions {
 	logLevel?: LogLevel;
@@ -149,9 +149,9 @@ class FileLoggerStatic {
 		this.write(LogLevel.Error, message, logContext, args);
 	}
 
-	write(level: LogLevel, msg: string, context: any = {}, ...args) {
+	write(level: LogLevel, msg: string, context: any = {}, args) {
 		if (this._logLevel <= level) {
-			const message = this._formatter(level, msg, context, ...args);
+			const message = this._formatter(level, msg, context, args);
 			if (this._sendFileLogsAlsoToConsole) {
 				let outputMessage = msg;
 				args.forEach((arg: any) => {
@@ -202,7 +202,7 @@ class FileLoggerStatic {
 
 export const logLevelNames = ["DEBUG", "INFO", "WARN", "ERROR"];
 
-export const defaultFormatter: LogFormatter = (level, msg, context, ...args) => {
+export const defaultFormatter: LogFormatter = (level, msg, context, args) => {
 	const now = new Date();
 	const levelName = logLevelNames[level];
 	let message = `${now.toISOString()} [${levelName}]  ${msg} ${context}`;
@@ -214,7 +214,7 @@ export const defaultFormatter: LogFormatter = (level, msg, context, ...args) => 
 	return message;
 };
 
-export const jsonFormatter: LogFormatter = (level, msg, context, ...args) => {
+export const jsonFormatter: LogFormatter = (level, msg, context, args) => {
 	const now = new Date();
 	const levelName = logLevelNames[level];
 	let message = msg;
