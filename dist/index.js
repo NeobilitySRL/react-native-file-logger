@@ -56,6 +56,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileLogger = exports.jsonFormatter = exports.defaultFormatter = exports.logLevelNames = exports.LogLevel = void 0;
 var react_native_1 = require("react-native");
+var flatted_1 = require("flatted");
 var RNFileLogger = react_native_1.NativeModules.FileLogger;
 var LogLevel;
 (function (LogLevel) {
@@ -201,7 +202,7 @@ var FileLoggerStatic = /** @class */ (function () {
             if (this._sendFileLogsAlsoToConsole) {
                 var outputMessage_1 = msg;
                 args.forEach(function (arg) {
-                    outputMessage_1 += " " + arg.toString();
+                    outputMessage_1 += " " + flatted_1.stringify(arg);
                 });
                 console.log(new Date().toISOString() + " | [" + level + "]: " + outputMessage_1);
             }
@@ -237,7 +238,7 @@ exports.defaultFormatter = function (level, msg, context) {
     var levelName = exports.logLevelNames[level];
     var message = now.toISOString() + " [" + levelName + "]  " + msg + " " + context;
     args.forEach(function (arg) {
-        message += " " + arg.toString();
+        message += " " + flatted_1.stringify(arg);
     });
     return message;
 };
@@ -250,7 +251,7 @@ exports.jsonFormatter = function (level, msg, context) {
     var levelName = exports.logLevelNames[level];
     var message = msg;
     args.forEach(function (arg) {
-        message += " " + arg.toString();
+        message += " " + flatted_1.stringify(arg);
     });
     return JSON.stringify(__assign({ timestamp: now.toISOString(), logLevel: levelName, message: message }, context));
 };
