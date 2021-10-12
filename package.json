@@ -41,5 +41,8 @@
 		"react-native": "^0.61.5",
 		"rimraf": "^3.0.2",
 		"typescript": "^3.9.6"
+	},
+	"dependencies": {
+		"flatted": "^3.2.2"
 	}
 }

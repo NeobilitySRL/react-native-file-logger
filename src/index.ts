@@ -1,4 +1,5 @@
 import { NativeModules } from "react-native";
+import { stringify } from 'flatted';
 
 declare var global: any;
 
@@ -154,7 +155,7 @@ class FileLoggerStatic {
 			if (this._sendFileLogsAlsoToConsole) {
 				let outputMessage = msg;
 				args.forEach((arg: any) => {
-					outputMessage += ` ${arg.toString()}`
+					outputMessage += ` ${stringify(arg)}`
 				});
 
 				console.log(`${new Date().toISOString()} | [${level}]: ${outputMessage}`);
@@ -207,7 +208,7 @@ export const defaultFormatter: LogFormatter = (level, msg, context, ...args) => 
 	let message = `${now.toISOString()} [${levelName}]  ${msg} ${context}`;
 
 	args.forEach((arg: any) => {
-		message += ` ${arg.toString()}`
+		message += ` ${stringify(arg)}`
 	});
 
 	return message;
@@ -219,7 +220,7 @@ export const jsonFormatter: LogFormatter = (level, msg, context, ...args) => {
 	let message = msg;
 
 	args.forEach((arg: any) => {
-		message += ` ${arg.toString()}`
+		message += ` ${stringify(arg)}`
 	});
 
 	return JSON.stringify({
