@@ -43,6 +43,6 @@
 		"typescript": "^3.9.6"
 	},
 	"dependencies": {
-		"flatted": "^3.2.2"
+		"flatted": "^3.2.4"
 	}
 }
